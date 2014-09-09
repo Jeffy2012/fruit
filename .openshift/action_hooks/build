@@ -1,0 +1,5 @@
+echo install ....
+echo $OPENSHIFT_REPO_DIR
+cd $OPENSHIFT_REPO_DIR
+composer install
+echo install complete.
