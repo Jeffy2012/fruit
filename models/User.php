@@ -2,102 +2,163 @@
 
 namespace app\models;
 
-class User extends \yii\base\Object implements \yii\web\IdentityInterface
-{
-    public $id;
-    public $username;
-    public $password;
-    public $authKey;
-    public $accessToken;
+use Yii;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
+use yii\web\IdentityInterface;
+use yii\db\Expression;
 
-    private static $users = [
-        '100' => [
-            'id' => '100',
-            'username' => 'admin',
-            'password' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-        ],
-        '101' => [
-            'id' => '101',
-            'username' => 'demo',
-            'password' => 'demo',
-            'authKey' => 'test101key',
-            'accessToken' => '101-token',
-        ],
-    ];
+/**
+ * This is the model class for table "user".
+ *
+ * @property string $user_id
+ * @property string $email
+ * @property string $phone_number
+ * @property string $nickname
+ * @property string $gender
+ * @property string $password
+ * @property string $activated
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string $activated_at
+ * @property string $auth_key
+ */
+class User extends ActiveRecord implements IdentityInterface
+{
+    /**
+     * @inheritdoc
+     */
+    public static function tableName()
+    {
+        return 'user';
+    }
 
     /**
      * @inheritdoc
      */
+    public function rules()
+    {
+        return [
+            [['email', 'created_at', 'auth_key'], 'required'],
+            [['gender', 'activated'], 'string'],
+            [['created_at', 'updated_at', 'activated_at'], 'safe'],
+            [['email'], 'string', 'max' => 100],
+            [['phone_number'], 'string', 'max' => 11],
+            [['nickname'], 'string', 'max' => 20],
+            [['password'], 'string', 'max' => 64],
+            [['auth_key'], 'string', 'max' => 32],
+            [['auth_key'], 'unique'],
+            [['email'], 'unique'],
+            [['phone_number'], 'unique'],
+            [['nickname'], 'unique']
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return [
+            'user_id' => 'User ID',
+            'email' => 'Email',
+            'phone_number' => 'Phone Number',
+            'nickname' => 'Nickname',
+            'gender' => 'Gender',
+            'password' => 'Password',
+            'activated' => 'Activated',
+            'created_at' => 'Created At',
+            'updated_at' => 'Updated At',
+            'activated_at' => 'Activated At',
+            'auth_key' => 'Auth Key',
+        ];
+    }
+
+    public function scenarios()
+    {
+        return [
+            'register' => ['email', 'password'],
+            'activate' => ['activated']
+        ];
+    }
+
     public static function findIdentity($id)
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+        return static::findOne($id);
     }
 
-    /**
-     * @inheritdoc
-     */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        foreach (self::$users as $user) {
-            if ($user['accessToken'] === $token) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        return static::findOne(['access_token' => $token]);
     }
 
-    /**
-     * Finds user by username
-     *
-     * @param  string      $username
-     * @return static|null
-     */
-    public static function findByUsername($username)
-    {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function getId()
     {
-        return $this->id;
+        return $this->user_id;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getAuthKey()
     {
-        return $this->authKey;
+        return $this->auth_key;
     }
 
-    /**
-     * @inheritdoc
-     */
     public function validateAuthKey($authKey)
     {
-        return $this->authKey === $authKey;
+        return $this->authkey === $authKey;
     }
 
-    /**
-     * Validates password
-     *
-     * @param  string  $password password to validate
-     * @return boolean if password provided is valid for current user
-     */
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => TimestampBehavior::className(),
+                'createdAtAttribute' => 'created_at',
+                'updatedAtAttribute' => 'updated_at',
+                'value' => new Expression('NOW()'),
+            ],
+        ];
+    }
+
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->isNewRecord) {
+                $this->password = Yii::$app->getSecurity()->generatePasswordHash($this->password);;
+                $this->auth_key = Yii::$app->getSecurity()->generateRandomString();
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+        if ($insert) {
+            Yii::$app->mailer->compose('activation', ['user' => $this])
+                ->setFrom(Yii::$app->params['adminEmail'])
+                ->setTo($this->email)
+                ->setSubject('系统邮件,请勿回复')
+                ->send();
+        }
+    }
+
+
+    public function activate($type)
+    {
+        $this->scenario = 'activate';
+        if ($type == 'email') {
+            $this->activated = 'E';
+            $this->touch('activated_at');
+            $this->save();
+            return $this;
+        }
+        return false;
+    }
+
     public function validatePassword($password)
     {
-        return $this->password === $password;
+        return Yii::$app->getSecurity()->validatePassword($password, $this->password);
     }
 }
