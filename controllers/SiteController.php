@@ -100,7 +100,7 @@ class SiteController extends Controller
     {
         $user = User::findOne($id);
         if ($key == $user->auth_key && $user->activate('email')) {
-            $status = false;
+            $status = true;
         }else{
             $status = false;
         }
