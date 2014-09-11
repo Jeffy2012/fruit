@@ -1,5 +1,5 @@
 <?php
-if (YII_ENV_DEV) {
+if (!YII_ENV_PROD) {
     return [
         'class' => 'yii\db\Connection',
         'dsn' => 'mysql:host=localhost;dbname=yii2basic',

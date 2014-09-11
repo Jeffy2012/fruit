@@ -2,14 +2,13 @@
 
 namespace app\controllers;
 
-use app\models\User;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
+use app\models\User;
 use app\models\LoginForm;
 use app\models\RegisterForm;
-use app\models\ContactForm;
 
 class SiteController extends Controller
 {
@@ -101,8 +100,11 @@ class SiteController extends Controller
     {
         $user = User::findOne($id);
         if ($key == $user->auth_key && $user->activate('email')) {
-            return $this->goHome();
+            $status = false;
+        }else{
+            $status = false;
         }
+        return $this->render('activate',['status' => $status ]);
     }
 
     public function actionLogout()

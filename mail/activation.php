@@ -3,6 +3,8 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 
 /* @var $this yii\web\View */
+/* @var $user app\models\User */
+
 $this->title = '激活邮件';
 ?>
 <div class="site-about">
