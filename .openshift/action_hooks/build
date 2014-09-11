@@ -1,5 +1,7 @@
 echo install ....
-echo $OPENSHIFT_REPO_DIR
-cd $OPENSHIFT_REPO_DIR
-composer install
+cp -Rf $OPENSHIFT_TMP_DIR/vendor/ $OPENSHIFT_REPO_DIR
+cp -Rf $OPENSHIFT_TMP_DIR/composer.lock $OPENSHIFT_REPO_DIR
+#echo $OPENSHIFT_REPO_DIR
+#cd $OPENSHIFT_REPO_DIR
+#composer install
 echo install complete.
