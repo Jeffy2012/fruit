@@ -24,9 +24,9 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]); ?>
 
-    <?= $form->field($model, 'username') ?>
+    <?= $form->field($model, 'username')->textInput(['placeholder'=>'昵称 / 邮箱 / 手机']) ?>
 
-    <?= $form->field($model, 'password')->passwordInput() ?>
+    <?= $form->field($model, 'password')->passwordInput(['placeholder'=>'密码']) ?>
 
     <?php if (Yii::$app->session['loginError'] >= 3) { ?>
         <?=
