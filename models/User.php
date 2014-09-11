@@ -136,11 +136,7 @@ class User extends ActiveRecord implements IdentityInterface
     {
         parent::afterSave($insert, $changedAttributes);
         if ($insert) {
-            Yii::$app->mailer->compose('activation', ['user' => $this])
-                ->setFrom(Yii::$app->params['adminEmail'])
-                ->setTo($this->email)
-                ->setSubject('系统邮件,请勿回复')
-                ->send();
+            $this->sendActivateEmail();
         }
     }
 
@@ -160,5 +156,14 @@ class User extends ActiveRecord implements IdentityInterface
     public function validatePassword($password)
     {
         return Yii::$app->getSecurity()->validatePassword($password, $this->password);
+    }
+
+    public function sendActivateEmail()
+    {
+        return Yii::$app->mailer->compose('activation', ['user' => $this])
+            ->setFrom(Yii::$app->params['adminEmail'])
+            ->setTo($this->email)
+            ->setSubject('系统邮件,请勿回复')
+            ->send();
     }
 }
