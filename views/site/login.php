@@ -31,7 +31,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php if (Yii::$app->session['loginError'] >= 3) { ?>
         <?=
         $form->field($model, 'verifyCode')->widget(Captcha::className(), [
-            'template' => '<div class="row"><div class="col-lg-4">{image}</div><div class="col-lg-5">{input}</div></div>',
+            'template' => '<div class="row"><div class="col-lg-5">{image}</div><div class="col-lg-7">{input}</div></div>',
         ]) ?>
     <?php } ?>
     <?=
