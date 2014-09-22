@@ -9,19 +9,30 @@ use yii\web\IdentityInterface;
 use yii\db\Expression;
 
 /**
- * This is the model class for table "user".
+ * This is the model class for table "users".
  *
- * @property string $user_id
+ * @property string $id
  * @property string $email
  * @property string $phone_number
  * @property string $nickname
+ * @property string $name
  * @property string $gender
  * @property string $password
  * @property string $activated
  * @property string $created_at
  * @property string $updated_at
  * @property string $activated_at
+ * @property string $birthday
+ * @property string $state
+ * @property string $province
+ * @property string $city
+ * @property string $district
+ * @property string $street
+ * @property string $postal_code
  * @property string $auth_key
+ *
+ * @property Orchards[] $orchards
+ * @property Receivers[] $receivers
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -30,7 +41,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function tableName()
     {
-        return 'user';
+        return 'users';
     }
 
     /**
@@ -41,14 +52,16 @@ class User extends ActiveRecord implements IdentityInterface
         return [
             [['email', 'created_at', 'auth_key'], 'required'],
             [['gender', 'activated'], 'string'],
-            [['created_at', 'updated_at', 'activated_at'], 'safe'],
-            [['email'], 'string', 'max' => 100],
+            [['created_at', 'updated_at', 'activated_at', 'birthday'], 'safe'],
+            [['email', 'street'], 'string', 'max' => 100],
             [['phone_number'], 'string', 'max' => 11],
-            [['nickname'], 'string', 'max' => 20],
+            [['nickname', 'name'], 'string', 'max' => 40],
             [['password'], 'string', 'max' => 64],
+            [['state', 'province', 'city', 'district'], 'string', 'max' => 20],
+            [['postal_code'], 'string', 'max' => 10],
             [['auth_key'], 'string', 'max' => 32],
-            [['auth_key'], 'unique'],
             [['email'], 'unique'],
+            [['auth_key'], 'unique'],
             [['phone_number'], 'unique'],
             [['nickname'], 'unique']
         ];
@@ -60,18 +73,42 @@ class User extends ActiveRecord implements IdentityInterface
     public function attributeLabels()
     {
         return [
-            'user_id' => 'User ID',
+            'id' => 'ID',
             'email' => 'Email',
             'phone_number' => 'Phone Number',
             'nickname' => 'Nickname',
+            'name' => 'Name',
             'gender' => 'Gender',
             'password' => 'Password',
             'activated' => 'Activated',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'activated_at' => 'Activated At',
+            'birthday' => 'Birthday',
+            'state' => 'State',
+            'province' => 'Province',
+            'city' => 'City',
+            'district' => 'District',
+            'street' => 'Street',
+            'postal_code' => 'Postal Code',
             'auth_key' => 'Auth Key',
         ];
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getOrchards()
+    {
+        return $this->hasMany(Orchards::className(), ['user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getReceivers()
+    {
+        return $this->hasMany(Receivers::className(), ['user_id' => 'id']);
     }
 
     public function scenarios()
@@ -94,7 +131,7 @@ class User extends ActiveRecord implements IdentityInterface
 
     public function getId()
     {
-        return $this->user_id;
+        return $this->id;
     }
 
     public function getAuthKey()
