@@ -1,8 +1,11 @@
+#ssh://540ec718e0b8cd6ad80004d5@fruit-jeffy.rhcloud.com/~/git/fruit.git/
+#ssh 540ec718e0b8cd6ad80004d5@fruit-jeffy.rhcloud.com
+echo install newest composer to tmp
+curl -sS https://getcomposer.org/installer | php -- --install-dir=/tmp
+echo download complete
+cd $OPENSHIFT_REPO_DIR
+echo now in `pwd`
 echo install ....
-cp -Rf $OPENSHIFT_TMP_DIR/vendor $OPENSHIFT_REPO_DIR
-#cp -Rf $OPENSHIFT_TMP_DIR/composer.lock $OPENSHIFT_REPO_DIR
-#echo $OPENSHIFT_REPO_DIR
-#cd $OPENSHIFT_REPO_DIR
-#composer install
-#cp -Rf  $OPENSHIFT_REPO_DIR/vendor $OPENSHIFT_TMP_DIR
-echo install complete.
+php /tmp/composer.phar global require "fxp/composer-asset-plugin:1.0.*@dev"
+php /tmp/composer.phar install
+echo composer install complete.
